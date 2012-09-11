@@ -118,8 +118,11 @@ function hurt(e)
 
 		var text = 'I survived ' + ((l.level || 1) - 1) + ' waves and got ' + l.p + ' points in SORADES 13K:';
 		// Always use my
-		var url = /^\w+:\/\/maettig\.com/.test(location.href) ? location.href : 'http://maettig.com/code/canvas/starship-sorades-13k/';
-		tweet.getElementsByTagName('A')[0].href = 'https://twitter.com/share?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url) + '&via=maettig';
+		var url = /^\w+:\/\/maettig\.com/.test(location.href)
+			? location.href
+			: 'http://maettig.com/code/canvas/starship-sorades-13k/';
+		tweet.getElementsByTagName('A')[0].href = 'https://twitter.com/share?text=' +
+			encodeURIComponent(text) + '&url=' + encodeURIComponent(url) + '&via=maettig';
 		tweet.style.display = '';
 		var input = tweet.getElementsByTagName('INPUT')[0];
 		input.value = text + ' ' + url;
@@ -963,7 +966,8 @@ function gameloop()
 				break;
 			}
 		}
-		if (--bullets[i].t < 0 || bullets[i].y < -ship.R || bullets[i].x < -bullets.R || bullets[i].x >= l.WIDTH + bullets.R || bullets[i].y >= l.HEIGHT + bullets.R)
+		if (--bullets[i].t < 0 || bullets[i].y < -ship.R || bullets[i].x < -bullets.R ||
+			bullets[i].x >= l.WIDTH + bullets.R || bullets[i].y >= l.HEIGHT + bullets.R)
 			bullets.splice(i, 1);
 	}
 
@@ -1006,8 +1010,8 @@ function gameloop()
 					break;
 				case 'S':
 					// Multiple shields are not set but loaded, hence the addition
-					ship.shield.t += ship.shield.MAX_T * ship.shield.MAX_T * 2 / (ship.shield.t + ship.shield.MAX_T * 2) | 0;
-					//ship.shield.t += ship.shield.MAX_T * ship.shield.MAX_T / (ship.shield.t + ship.shield.MAX_T);
+					ship.shield.t += ship.shield.MAX_T * ship.shield.MAX_T *
+						2 / (ship.shield.t + ship.shield.MAX_T * 2) | 0;
 					play(3);
 					break;
 				case 'B':
@@ -1033,7 +1037,8 @@ function gameloop()
 		a.drawImage(bonus.images[bonus[i].i], bonus[i].x - bonus.R | 0, bonus[i].y - bonus.R | 0);
 		bonus[i].x += bonus[i].xAcc;
 		bonus[i].y += bonus[i].yAcc;
-		if (bonus[i].y >= l.HEIGHT + bonus.R || bonus[i].x < -bonus.R || bonus[i].x >= l.WIDTH + bonus.R || bonus[i].y < -bonus.R)
+		if (bonus[i].y >= l.HEIGHT + bonus.R || bonus[i].x < -bonus.R ||
+			bonus[i].x >= l.WIDTH + bonus.R || bonus[i].y < -bonus.R)
 			bonus.splice(i, 1);
 	}
 
@@ -1048,7 +1053,8 @@ function gameloop()
 		}
 
 		// Avoid sub-pixel rendering by trimming all coordinates to whole numbers
-		a.drawImage(torpedos.images[torpedos.frame], torpedos[j].x - torpedos.R | 0, torpedos[j].y - torpedos.R | 0);
+		a.drawImage(torpedos.images[torpedos.frame],
+			torpedos[j].x - torpedos.R | 0, torpedos[j].y - torpedos.R | 0);
 		/*
 		a.save()
 		a.translate(torpedos[j].x, torpedos[j].y);
@@ -1059,7 +1065,8 @@ function gameloop()
 
 		torpedos[j].x += torpedos[j].xAcc;
 		torpedos[j].y += torpedos[j].yAcc;
-		if (torpedos[j].y >= l.HEIGHT + torpedos.R || torpedos[j].x < -torpedos.R || torpedos[j].x >= l.WIDTH + torpedos.R || torpedos[j].y < -l.HEIGHT)
+		if (torpedos[j].y >= l.HEIGHT + torpedos.R || torpedos[j].x < -torpedos.R ||
+			torpedos[j].x >= l.WIDTH + torpedos.R || torpedos[j].y < -l.HEIGHT)
 			torpedos.splice(j, 1);
 	}
 	torpedos.frame++;
@@ -1072,11 +1079,13 @@ function gameloop()
 		a.globalAlpha = explosions[i].alpha;
 		a.translate(explosions[i].x, explosions[i].y);
 		a.rotate(explosions[i].angle);
-		a.drawImage(explosions.image, -explosions[i].size / 2, -explosions[i].size / 2, explosions[i].size, explosions[i].size);
+		a.drawImage(explosions.image, -explosions[i].size / 2, -explosions[i].size / 2,
+			explosions[i].size, explosions[i].size);
 		a.restore();
 		//a.lineWidth = .2;
 		//a.strokeStyle = '#FFF';
-		//a.strokeRect(explosions[i].x - explosions[i].size / 2, explosions[i].y - explosions[i].size / 2, explosions[i].size, explosions[i].size);
+		//a.strokeRect(explosions[i].x - explosions[i].size / 2, explosions[i].y - explosions[i].size / 2,
+		//	explosions[i].size, explosions[i].size);
 		explosions[i].size += 16;
 		explosions[i].angle += explosions[i].d;
 		explosions[i].alpha -= .1;
@@ -1133,11 +1142,13 @@ function gameloop()
 		//if (enemies[i].angle > maxAngle) enemies[i].angle = maxAngle;
 		//if (enemies[i].angle < -maxAngle) enemies[i].angle = -maxAngle;
 
-		//a.drawImage(enemies[i].image, enemies[i].x - enemies[i].r | 0, enemies[i].y - enemies[i].r | 0, enemies[i].r * 2, enemies[i].r * 2);
+		//a.drawImage(enemies[i].image, enemies[i].x - enemies[i].r | 0, enemies[i].y - enemies[i].r | 0,
+		//	enemies[i].r * 2, enemies[i].r * 2);
 		a.save()
 		a.translate(enemies[i].x, y);
 		a.rotate(enemies[i].angle);
-		a.drawImage(enemies[i].image, -enemies[i].r, enemies[i].y - y - enemies[i].r, enemies[i].r * 2, enemies[i].r * 2);
+		a.drawImage(enemies[i].image, -enemies[i].r, enemies[i].y - y - enemies[i].r,
+			enemies[i].r * 2, enemies[i].r * 2);
 		a.restore();
 
 		var d = enemies[i].r * .6;
