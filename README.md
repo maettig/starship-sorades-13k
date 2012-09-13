@@ -1,11 +1,12 @@
 SORADES 13K
 ===========
 
-A scrolling shooter in the vein of "Raptor: Call of the Shadows" and "Warning Forever".
-Are you able to survive 13 waves? Press X to fire, F for fullscreen, P for pause,
-M to switch to the original ship model from our full-featured "Starship Sorades"
-game (yes, I had 3 KB left and wasted them for an easter egg). Multiple control
-schemes provided, e.g. cursor keys, WASD and numpad. 
+A scrolling shooter in the vein of "Raptor: Call of the Shadows" and
+"Warning Forever". Are you able to survive 13 waves? Press X to fire,
+F for fullscreen, P for pause, M to switch to the original ship model from
+[our full-featured "Starship Sorades" game](http://www.gramambo.de/index.php?option=com_content&view=article&id=17%3Astarship-sorades&catid=2&Itemid=5)
+(yes, I had 3 KB left and wasted them for an easter egg).
+Multiple control schemes provided, e.g. cursor keys, WASD and numpad.
 
 I use a lot of pre-rendering and other tricks to make this run as fast as
 possible on a wide variety of browsers and machines. Developed with Opera.
@@ -21,7 +22,7 @@ Sound effects by [Sven Gramatke](http://www.sven-gramatke.de/).
 Licensed under a Creative [Commons Attribution-ShareAlike 3.0 Germany License](http://creativecommons.org/licenses/by-sa/3.0/de/)
 (CC-BY-SA-3.0-DE).
 
-Contains [jsfxr](https://github.com/mneubrand/jsfxr)
+Contains a modified version of [jsfxr](https://github.com/mneubrand/jsfxr)
 by [Markus Neubrand](https://twitter.com/markusneubrand),
 based on [as3sfxr](http://code.google.com/p/as3sfxr/)
 (licensed under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0))
