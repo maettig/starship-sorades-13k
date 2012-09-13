@@ -3,9 +3,12 @@ var interval;
 
 // Initialize a single static level object
 var l = {
+	// Currently a lot of objects and speeds don't scale well with the size of the canvas
 	WIDTH: 1024,
 	HEIGHT: 768,
+	// Scrolling speed for the background
 	SPEED: 2,
+	// Number of ticks for the screen flash effect
 	MAX_BOMB: 5,
 	y: 0,
 	bomb: 0,
@@ -101,10 +104,10 @@ function hurt(e)
 	if (ship.timeout < 0)
 	{
 		ship.e -= e;
+		if (ship.e < 0)
+			ship.e = 0;
 		ship.timeout = 10;
 	}
-	if (ship.e < 0)
-		ship.e = 0;
 	if (!ship.e && !l.paused)
 	{
 		// Giant explosion
@@ -117,7 +120,7 @@ function hurt(e)
 			window.clearInterval(interval);
 
 		var text = 'I survived ' + ((l.level || 1) - 1) + ' waves and got ' + l.p + ' points in SORADES 13K:';
-		// Always use my
+		// Always use my domain as canonical link
 		var url = /^\w+:\/\/maettig\.com/.test(location.href)
 			? location.href
 			: 'http://maettig.com/code/canvas/starship-sorades-13k/';
@@ -141,6 +144,7 @@ function hurt(e)
 
 function fire(xAcc, yAcc)
 {
+	// The acceleration of the bullets changes with the acceleration of the ship
 	xAcc += ship.xAcc / 2;
 	yAcc += ship.yAcc / 2;
 	bullets.push({
@@ -169,8 +173,10 @@ function spawnBonus(o, i)
 	if (!i)
 	{
 		var r = Math.random();
+		// A chance of 10 percent for every bonus, everything else is just money
 		i = r > .9 ? '+' : (r > .8 ? 'E' : (r > .7 ? 'S' : (r > .6 ? 'B' : '\u20AC')));
 	}
+	// Lazy loading, this allows me to use every character I want whenever I want it
 	if (!bonus.images[i])
 		bonus.images[i] = render(function(c, a)
 		{
@@ -197,6 +203,7 @@ function spawnBonus(o, i)
 function spawnTorpedo(o, angle, maxAngle)
 {
 	var y = o.y + (o.yOffset || 0) | 0;
+	// Never spawn any torpedos if the enemy is still to far away
 	if (y < -l.HEIGHT / 4)
 		return false
 	if (maxAngle)
@@ -208,6 +215,7 @@ function spawnTorpedo(o, angle, maxAngle)
 		if (angle < -maxAngle)
 			angle = -maxAngle;
 	}
+	// All torpedos share the same speed, no matter which enemy fires them
 	var speed = 3 + l.level / 2;
 	torpedos.push({
 		x: o.x | 0,
@@ -219,8 +227,10 @@ function spawnTorpedo(o, angle, maxAngle)
 	return true;
 }
 
+// Little helper function to spawn a new enemy, calls the spawn method from the enemy object
 function spawnEnemy(i, y)
 {
+	// Can be used to spawn a random enemy, currently unused
 	if (i < 0 || i >= enemies.TYPES.length)
 		i = Math.random() * enemies.TYPES.length | 0;
 	var type = enemies.TYPES[i];
@@ -235,6 +245,7 @@ function play(i)
 {
 	if (sfx[i] && sfx[i][sfx[i].i])
 	{
+		// Maybe I should have added a stop() call here, but I'm not sure about this
 		sfx[i][sfx[i].i++].play(true);
 		sfx[i].i %= sfx[i].length;
 	}
@@ -251,6 +262,7 @@ function render(f, w, h, c)
 	return c;
 }
 
+// The players ship and all enemies do have a bright diamond shape in their center
 function renderHeart(a, x, y)
 {
 	var p = 10;
@@ -286,19 +298,17 @@ function spawnText(text, t)
 		a.fillStyle = '#FFF';
 		a.shadowBlur = 3;
 		a.shadowColor = 'rgba(0,0,0,.5)';
-		//a.fillText(text, c.width / 2, c.height / 2, maxWidth);
 
 		a.lineWidth = 3;
 		a.lineJoin = 'round';
 		a.strokeStyle = '#FFF';
-		//a.shadowColor = 'rgba(0,0,0,.6)';
 		a.shadowColor = '#000';
 		a.strokeText(text, c.width / 2, c.height / 2, maxWidth);
 
 		a.globalAlpha = .2;
 		a.globalCompositeOperation = 'source-atop';
-		//a.fillStyle = 'rgba(0,0,0,.2)';
 		a.fillStyle = '#62F';
+		// It seems I forgot to set shadowBlur = 0 here
 		for (var i = 0; i < c.height; i += 3)
 			a.fillRect(0, i, c.width, 1);
 	}, l.WIDTH / 1.6, l.WIDTH / 8, l.text.image);
@@ -306,6 +316,7 @@ function spawnText(text, t)
 	l.text.y = 16;
 	l.text.yAcc = l.SPEED / 2;
 	l.text.t = t || l.text.MAX_T;
+	// The "PAUSE" and "GAME OVER" texts need to be drawn instantly
 	if (t < 0)
 	{
 		l.text.t = 0;
@@ -350,6 +361,7 @@ l.background = render(function(c, a)
 	a.strokeStyle = '#111';
 	a.shadowColor = '#444';
 	a.stroke();
+	// Mirror the image and render it on top of itself
 	a.shadowBlur = 0;
 	a.globalAlpha = .25;
 	a.translate(c.width, 0);
@@ -375,6 +387,7 @@ ship.image = render(function(c, a)
 	a.stroke();
 	a.stroke();
 
+	// Maybe I could have used the renderHeart() function here but it's slightly different and I was to lazy
 	var p = 10;
 	a.beginPath();
 	a.moveTo(c.width / 2 - p, c.height / 2);
@@ -399,6 +412,7 @@ ship.shield.image = render(function(c, a)
 	a.beginPath();
 	a.arc(c.width / 2, c.height / 2, c.width / 2 + a.lineWidth / 2 - d, 0, Math.PI * 2);
 	a.stroke();
+	// Draw a black arc to clip the outer half of the shadow
 	a.lineWidth = 26 + d;
 	a.shadowBlur = 0;
 	a.beginPath();
@@ -406,6 +420,7 @@ ship.shield.image = render(function(c, a)
 	a.stroke();
 }, ship.shield.R * 2);
 
+// A bullet is a tiny diamond shape with a bright glowing shadow
 bullets.image = render(function(c, a)
 {
 	a.beginPath();
@@ -423,14 +438,17 @@ bullets.image = render(function(c, a)
 	a.stroke();
 }, bullets.R * 2);
 
+// The explosion sprite is only 16px but is painted in all sizes up to 1000px
 explosions.image = render(function(c, a)
 {
 	a.fillStyle = '#F63'
 	a.shadowBlur = 6;
 	a.shadowColor = a.fillStyle;
 	var p = a.shadowBlur;
+	// Overlaying multiple blured rectangles make them almost disapear
 	for (var i = 5; i--; )
 		a.fillRect(p, p, c.width - p * 2, c.height - p * 2);
+	// Draw a tiny, tiny cross in the middle
 	a.lineWidth = .3;
 	a.strokeStyle = '#FC6'
 	p *= .8;
@@ -466,7 +484,9 @@ for (var i = count; i--; )
 		a.stroke();
 	}, torpedos.R * 2));
 
+// I wanted to use real inheritance but this is not so easy in JavaScript, unfortunately
 enemies.TYPES = [
+	// Enemy number 0 is the smallest
 	{
 		render: function(c, a)
 		{
@@ -519,6 +539,7 @@ enemies.TYPES = [
 				play(19);
 		}
 	},
+	// Enemy number 1 is slightly bigger than enemy number 0, but almost the same
 	{
 		render: function(c, a)
 		{
@@ -566,6 +587,7 @@ enemies.TYPES = [
 			this.t = 600 / (l.level + 4) | 0;
 			if (this.t < 5)
 				this.t = 5;
+			// I can't use the angle calculation from the spawnTorpedo() function because of the two directions
 			if (angle > Math.PI)
 				angle -= Math.PI * 2;
 			if (angle > this.maxAngle)
@@ -577,6 +599,7 @@ enemies.TYPES = [
 				play(20);
 		}
 	},
+	// Enemy number 2 is probably the most dangerous, fires in all directions but does not aim
 	{
 		render: function(c, a)
 		{
@@ -650,6 +673,7 @@ enemies.TYPES = [
 				play(18);
 		}
 	},
+	// Enemy number 3 was the first I created, the idea was it grows bigger and bigger like in "Warning Forever"
 	{
 		R: Math.max(l.WIDTH, l.HEIGHT) / 8 | 0,
 		render: function(c, a)
@@ -737,8 +761,9 @@ enemies.TYPES = [
 		},
 		shoot: function(angle)
 		{
+			// Always aim at the player and fire randomly, 1 shot every 3 seconds on average
 			this.t = Math.random() * 6 * 30 | 0;
-			if ( spawnTorpedo(this, angle))
+			if (spawnTorpedo(this, angle))
 				play(12);
 		}
 	}
@@ -765,7 +790,7 @@ fps.i = 0;
 fps.t = 1;
 */
 
-// Keyboard handling
+// Keyboard handling, cursor keys and X is my main control scheme but several others are provided
 var keys = [], keyMap = {
 	27: 80, // Esc => P
 	32: 88, // Space => X
@@ -803,6 +828,7 @@ document.onkeydown = function(e)
 		}
 		else
 		{
+			// That's all I need for my little easter egg, the code above is to be able to switch back
 			var image = new Image();
 			image.onload = function()
 			{
@@ -812,7 +838,8 @@ document.onkeydown = function(e)
 			image.src = 'starship-sorades.jpg';
 		}
 	}
-	/* Cheat
+	// Cheat key skips to the next level
+	/*
 	else if (keys[79])
 	{
 		l.text.t = 0;
@@ -865,7 +892,7 @@ function gameloop()
 		}
 		play(ship.weapon > 2 ? 16 : ship.weapon > 0 ? 0 : 15);
 	}
-	ship.angle = ship.angle * ship.ANGLE_FACTOR;
+	ship.angle *= ship.ANGLE_FACTOR;
 	if (keys[37])
 	{
 		// This is required for a fast turn when stuck at the edge of the screen
@@ -902,13 +929,14 @@ function gameloop()
 		ship.y = 0;
 	else if (ship.y >= l.HEIGHT && ship.yAcc > 0)
 		ship.y = l.HEIGHT - 1;
-	// Accelerate the players ship and decrease the acceleration
+	// Accelerate the players ship
 	ship.x += ship.xAcc;
 	ship.y += ship.yAcc;
+	// Decrease the acceleration. I don't need to clip to a maximum, this is enough.
 	ship.xAcc *= ship.ACC_FACTOR;
 	ship.yAcc *= ship.ACC_FACTOR;
 
-	// Fill the screen with the background tiles
+	// Fill the screen with the background tile
 	var size = l.background.width;
 	for (var y = (l.y % size - size) | 0; y < l.HEIGHT; y += size)
 		for (var x = 0; x < l.WIDTH; x += size)
@@ -966,7 +994,8 @@ function gameloop()
 				break;
 			}
 		}
-		if (--bullets[i].t < 0 || bullets[i].y < -ship.R || bullets[i].x < -bullets.R ||
+		// There was a bug, the comparison "y < ship.R" was always false because ship.R is undefined
+		if (--bullets[i].t < 0 || bullets[i].x < -bullets.R ||
 			bullets[i].x >= l.WIDTH + bullets.R || bullets[i].y >= l.HEIGHT + bullets.R)
 			bullets.splice(i, 1);
 	}
@@ -1020,10 +1049,10 @@ function gameloop()
 						enemies[j].e--;
 						//explode(enemies[j].x, enemies[j].y);
 					}
-					// Avoid to much explosions at the same time, only for the oldest projectiles
+					// Avoid to much explosions at the same time, only for the oldest torpedos
 					for (var j = Math.min(torpedos.length, 5); j--; )
 						explode(torpedos[j].x, torpedos[j].y);
-					// Delete all projectiles
+					// Delete all torpedos
 					torpedos.length = 0;
 					l.bomb = l.MAX_BOMB;
 					play(13);
@@ -1037,7 +1066,7 @@ function gameloop()
 		a.drawImage(bonus.images[bonus[i].i], bonus[i].x - bonus.R | 0, bonus[i].y - bonus.R | 0);
 		bonus[i].x += bonus[i].xAcc;
 		bonus[i].y += bonus[i].yAcc;
-		if (bonus[i].y >= l.HEIGHT + bonus.R || bonus[i].x < -bonus.R ||
+		if (bonus[i].y >= l.HEIGHT + bonus.R * 2 || bonus[i].x < -bonus.R ||
 			bonus[i].x >= l.WIDTH + bonus.R || bonus[i].y < -bonus.R)
 			bonus.splice(i, 1);
 	}
@@ -1096,8 +1125,8 @@ function gameloop()
 
 	a.save()
 	a.translate(ship.x, ship.y);
-	var winkel = ship.angle * ship.MAX_ANGLE;
-	a.rotate(winkel / 180 * Math.PI);
+	var angle = ship.angle * ship.MAX_ANGLE;
+	a.rotate(angle / 180 * Math.PI);
 	a.drawImage(ship.image, -32, -64);
 	a.restore();
 
@@ -1128,10 +1157,12 @@ function gameloop()
 	for (var i = enemies.length; i--; )
 	{
 		var y = enemies[i].y + (enemies[i].yOffset || 0);
+		// Calculate the angle from the enemy to the players ship, this is used to shoot at the player
 		var angle = Math.atan((enemies[i].x - ship.x) / (y - ship.y));
 		if (ship.y <= y)
 			angle += Math.PI;
 
+		// Calculate the rotation of the enemy graphic
 		var bossAngle = (angle + Math.PI) % (Math.PI * 2) - Math.PI;
 		var maxAngle = enemies[i].maxAngle || 0;
 		if (bossAngle > maxAngle)
@@ -1151,7 +1182,9 @@ function gameloop()
 			enemies[i].r * 2, enemies[i].r * 2);
 		a.restore();
 
+		// All enemies share the same hit box
 		var d = enemies[i].r * .6;
+		// Visualize the hit box for debugging purposes
 		//a.lineWidth = .2;
 		//a.strokeStyle = '#FFF';
 		//a.strokeRect(enemies[i].x - d, enemies[i].y - d, d * 2, d * 2);
@@ -1185,7 +1218,7 @@ function gameloop()
 			enemies[i].y += enemies[i].yAcc || 1;
 		// Test only: if (enemies[i].y < 0) enemies[i].y = enemies[i].yStop;
 
-		// Shoot
+		// Each enemy shoots every few game ticks
 		if (--enemies[i].t < 0)
 			enemies[i].shoot(angle);
 	}
@@ -1193,6 +1226,7 @@ function gameloop()
 	// Disable additive blending
 	a.globalCompositeOperation = 'source-over';
 
+	// Draw the energy bar under the players ship
 	if (ship.osd)
 	{
 		var x = ship.x - 31.5 | 0, y = ship.y + 62.5 | 0;
@@ -1233,6 +1267,7 @@ function gameloop()
 	//window.setTimeout(gameloop, 33);
 }
 
+// Sound effects created with as3sfxr, see http://www.superflashbros.net/as3sfxr/
 var sfx = [
 	// 0 = Player shoots (Schuss_004)
 	'8|0,,.167,.1637,.1361,.7212,.0399,-.363,,,,,,.1314,.0517,,.0154,-.1633,1,,,.0515,,.2',
@@ -1299,6 +1334,7 @@ window.setTimeout(function()
 			}
 			catch (e)
 			{
+				// This happens in Internet Explorer 9, but I can live with that
 				//alert(e);
 			}
 	}
