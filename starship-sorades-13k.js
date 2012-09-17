@@ -27,6 +27,7 @@ var l = {
 
 // Initialize a single static object for the players ship
 var ship = {
+	R: Math.max(l.WIDTH, l.HEIGHT) / 16 | 0,
 	ACC: 1.5,
 	ACC_FACTOR: .9,
 	ANGLE_FACTOR: .8,
@@ -42,7 +43,6 @@ var ship = {
 	weapon: 0,
 	reload: 0,
 	shield: {
-		R: 64,
 		MAX_T: 5 * 30,
 		t: 0
 	}
@@ -235,7 +235,7 @@ function spawnEnemy(i, y)
 		i = Math.random() * enemies.TYPES.length | 0;
 	var type = enemies.TYPES[i];
 	if (!type.R)
-		type.R = 64;
+		type.R = Math.max(l.WIDTH, l.HEIGHT) / 16 | 0;
 	if (!type.image)
 		type.image = render(type.render, type.R * 2);
 	type.spawn(y);
@@ -265,7 +265,7 @@ function render(f, w, h, c)
 // The players ship and all enemies do have a bright diamond shape in their center
 function renderHeart(a, x, y)
 {
-	var p = 10;
+	var p = ship.R / 6 | 0;
 	a.beginPath();
 	a.moveTo(x - p, y);
 	a.lineTo(x, y + p);
@@ -283,7 +283,7 @@ function spawnText(text, t)
 	// Always render the buffered image first
 	l.text.image = render(function(c, a)
 	{
-		a.shadowBlur = 12;
+		a.shadowBlur = c.height / 10 | 0;
 		a.font = 'bold ' + (c.height * .9 - a.shadowBlur * 2 | 0) + 'px Consolas,monospace';
 		a.textAlign = 'center';
 		a.textBaseline = 'middle';
@@ -296,10 +296,10 @@ function spawnText(text, t)
 			a.fillText(text, c.width / 2, c.height / 2, maxWidth);
 
 		a.fillStyle = '#FFF';
-		a.shadowBlur = 3;
+		a.shadowBlur /= 4;
 		a.shadowColor = 'rgba(0,0,0,.5)';
 
-		a.lineWidth = 3;
+		a.lineWidth = a.shadowBlur;
 		a.lineJoin = 'round';
 		a.strokeStyle = '#FFF';
 		a.shadowColor = '#000';
@@ -357,7 +357,7 @@ l.background = render(function(c, a)
 		a.lineTo(c.width * 2, c.height * (i + 1) / 4);
 	}
 	a.lineWidth = 3;
-	a.shadowBlur = 6;
+	a.shadowBlur = a.lineWidth * 2;
 	a.strokeStyle = '#111';
 	a.shadowColor = '#444';
 	a.stroke();
@@ -380,15 +380,15 @@ ship.image = render(function(c, a)
 		a.lineTo(c.width * ( 5 - i) / 16, c.height * (15 - i) / 16);
 		a.closePath();
 	}
-	a.lineWidth = 3;
-	a.shadowBlur = 6;
+	a.lineWidth = c.width / 17 | 0;
+	a.shadowBlur = a.lineWidth * 2;
 	a.strokeStyle = '#9F0';
 	a.shadowColor = a.strokeStyle;
 	a.stroke();
 	a.stroke();
 
 	// Maybe I could have used the renderHeart() function here but it's slightly different and I was to lazy
-	var p = 10;
+	var p = c.width / 6 | 0;
 	a.beginPath();
 	a.moveTo(c.width / 2 - p, c.height / 2);
 	a.lineTo(c.width / 2, c.height / 2 + p);
@@ -399,14 +399,14 @@ ship.image = render(function(c, a)
 	a.shadowColor = a.strokeStyle;
 	a.stroke();
 	a.stroke();
-}, 64, 128);
+}, ship.R, ship.R * 2);
 
 // Render the shield graphic for the players ship
 ship.shield.image = render(function(c, a)
 {
 	var d = 8;
 	a.lineWidth = 18;
-	a.shadowBlur = 18;
+	a.shadowBlur = a.lineWidth;
 	a.strokeStyle = '#000';
 	a.shadowColor = '#CF0';
 	a.beginPath();
@@ -418,7 +418,7 @@ ship.shield.image = render(function(c, a)
 	a.beginPath();
 	a.arc(c.width / 2, c.height / 2, c.width / 2 + a.lineWidth / 2 - d, 0, Math.PI * 2);
 	a.stroke();
-}, ship.shield.R * 2);
+}, ship.R * 2);
 
 // A bullet is a tiny diamond shape with a bright glowing shadow
 bullets.image = render(function(c, a)
@@ -431,7 +431,7 @@ bullets.image = render(function(c, a)
 	a.lineTo(p, c.height / 2);
 	a.closePath();
 	a.lineWidth = 3;
-	a.shadowBlur = 6;
+	a.shadowBlur = a.lineWidth * 2;
 	a.strokeStyle = '#CF0';
 	a.shadowColor = a.strokeStyle;
 	a.stroke();
@@ -470,16 +470,16 @@ for (var i = count; i--; )
 		a.rotate(Math.PI / -2 * i / count);
 		a.translate(-c.width / 2, -c.height / 2);
 		a.beginPath();
-		a.shadowBlur = 6;
+		a.lineWidth = 3;
+		a.shadowBlur = a.lineWidth * 2;
+		a.strokeStyle = '#62F';
+		a.shadowColor = a.strokeStyle;
 		var p = a.shadowBlur;
 		a.moveTo(c.width / 2, p);
 		a.lineTo(c.width - p, c.height / 2);
 		a.lineTo(c.width / 2, c.height - p);
 		a.lineTo(p, c.height / 2);
 		a.closePath();
-		a.lineWidth = 3;
-		a.strokeStyle = '#62F';
-		a.shadowColor = a.strokeStyle;
 		a.stroke();
 		a.stroke();
 	}, torpedos.R * 2));
@@ -491,10 +491,11 @@ enemies.TYPES = [
 		render: function(c, a)
 		{
 			a.lineWidth = 3;
-			a.miterLimit = 128;
-			a.shadowBlur = 6;
+			a.shadowBlur = a.lineWidth * 2;
 			a.strokeStyle = '#62F';
 			a.shadowColor = a.strokeStyle;
+			a.miterLimit = 128;
+			a.beginPath();
 			for (var i = 5; i--; )
 			{
 				var x1 = c.width * (6 - i) / 11, y1 = c.height * (6 - i) / 20;
@@ -544,7 +545,7 @@ enemies.TYPES = [
 		render: function(c, a)
 		{
 			a.lineWidth = 3;
-			a.shadowBlur = 6;
+			a.shadowBlur = a.lineWidth * 2;
 			a.strokeStyle = '#62F';
 			a.shadowColor = a.strokeStyle;
 			for (var i = 5; i--; )
@@ -604,10 +605,10 @@ enemies.TYPES = [
 		render: function(c, a)
 		{
 			a.lineWidth = 3;
-			a.miterLimit = 32;
-			a.shadowBlur = 6;
+			a.shadowBlur = a.lineWidth * 2;
 			a.strokeStyle = '#62F';
 			a.shadowColor = a.strokeStyle;
+			a.miterLimit = 32;
 			a.beginPath();
 			for(var i = 0; i < Math.PI * 2; i += Math.PI / 4)
 			{
@@ -679,10 +680,10 @@ enemies.TYPES = [
 		render: function(c, a)
 		{
 			a.lineWidth = 3;
-			a.miterLimit = 32;
-			a.shadowBlur = 6;
+			a.shadowBlur = a.lineWidth * 2;
 			a.strokeStyle = '#62F';
 			a.shadowColor = a.strokeStyle;
+			a.miterLimit = 32;
 			a.beginPath();
 			for (var i = 7; i--; )
 			{
@@ -1010,10 +1011,12 @@ function gameloop()
 	// Enable additive blending for everything below
 	a.globalCompositeOperation = 'lighter';
 
+	var d = ship.R * .95 | 0,
+	    e = ship.R * .4 | 0;
 	for (var i = bonus.length; i--; )
 	{
-		if (ship.y < bonus[i].y + 60 && ship.y > bonus[i].y - 60 &&
-		    ship.x < bonus[i].x + 25 && ship.x > bonus[i].x - 25)
+		if (ship.y < bonus[i].y + d && ship.y > bonus[i].y - d &&
+		    ship.x < bonus[i].x + e && ship.x > bonus[i].x - e)
 		{
 			l.p += 10;
 			switch (bonus[i].i)
@@ -1073,8 +1076,8 @@ function gameloop()
 
 	for (var j = torpedos.length; j--; )
 	{
-		if (ship.y < torpedos[j].y + 60 && ship.y > torpedos[j].y - 60 &&
-		    ship.x < torpedos[j].x + 25 && ship.x > torpedos[j].x - 25)
+		if (ship.y < torpedos[j].y + d && ship.y > torpedos[j].y - d &&
+		    ship.x < torpedos[j].x + e && ship.x > torpedos[j].x - e)
 		{
 			hurt(10);
 			explode(torpedos[j].x, torpedos[j].y);
@@ -1127,13 +1130,13 @@ function gameloop()
 	a.translate(ship.x, ship.y);
 	var angle = ship.angle * ship.MAX_ANGLE;
 	a.rotate(angle / 180 * Math.PI);
-	a.drawImage(ship.image, -32, -64);
+	a.drawImage(ship.image, -ship.R / 2 | 0, -ship.R);
 	a.restore();
 
 	if (ship.shield.t)
 	{
 		if (ship.shield.t > 30 || Math.random() > .5)
-			a.drawImage(ship.shield.image, ship.x - ship.shield.R + .5 | 0, ship.y - ship.shield.R + .5 | 0);
+			a.drawImage(ship.shield.image, ship.x - ship.R + .5 | 0, ship.y - ship.R + .5 | 0);
 		if (!--ship.shield.t)
 			play(4);
 	}
