@@ -174,19 +174,19 @@ function spawnBonus(o, i)
 	{
 		var r = Math.random();
 		// A chance of 10 percent for every bonus, everything else is just money
-		i = r > .9 ? '+' : (r > .8 ? 'E' : (r > .7 ? 'S' : (r > .6 ? 'B' : '\u20AC')));
+		i = r > .9 ? '+' : (r > .8 ? 'E' : (r > .7 ? 'S' : (r > .6 ? 'B' : '10')));
 	}
 	// Lazy loading, this allows me to use every character I want whenever I want it
 	if (!bonus.images[i])
 		bonus.images[i] = render(function(c, a)
 		{
 			a.shadowBlur = 6;
-			a.fillStyle = '#FFC';
+			a.fillStyle = i.length > 1 ? '#FEB' : '#EFF';
 			a.shadowColor = a.fillStyle;
 			a.arc(c.width / 2, c.height / 2, c.width / 2 - a.shadowBlur, 0, Math.PI * 2);
 			a.fill();
 			a.fillStyle = 'rgba(0,0,0,.5)';
-			a.font = 'bold ' + (c.width / 1.8 | 0) + 'px sans-serif';
+			a.font = 'bold ' + (c.width / 1.8 - i.length * 7 + 7 | 0) + 'px sans-serif';
 			a.textAlign = 'center';
 			a.textBaseline = 'middle';
 			a.fillText(i, c.width / 2, c.height / 2);
@@ -1011,7 +1011,7 @@ function gameloop()
 	// Enable additive blending for everything below
 	a.globalCompositeOperation = 'lighter';
 
-	var d = ship.R * .95 | 0,
+	var d = ship.R * .8 | 0,
 	    e = ship.R * .4 | 0;
 	for (var i = bonus.length; i--; )
 	{
@@ -1153,6 +1153,7 @@ function gameloop()
 		spawnEnemy(2, -1 * l.HEIGHT);
 		spawnEnemy(3, -2.25 * l.HEIGHT);
 		spawnText('WAVE ' + l.level);
+		l.bomb = l.MAX_BOMB;
 		play(8);
 	}
 
